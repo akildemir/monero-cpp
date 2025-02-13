@@ -1280,6 +1280,7 @@ namespace monero {
     m_below_amount = config.m_below_amount;
     m_sweep_each_subaddress = config.m_sweep_each_subaddress;
     m_key_image = config.m_key_image;
+    m_data = config.m_data;
   }
 
   monero_tx_config monero_tx_config::copy() const {
@@ -1359,6 +1360,15 @@ namespace monero {
       else if (key == std::string("belowAmount")) config->m_below_amount = it->second.get_value<uint64_t>();
       else if (key == std::string("sweepEachSubaddress")) config->m_sweep_each_subaddress = it->second.get_value<bool>();
       else if (key == std::string("keyImage")) config->m_key_image = it->second.data();
+      else if (key == std::string("data")) {
+        // to store the arbitrary data
+        std::vector<uint8_t> data;
+
+        for (boost::property_tree::ptree::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) 
+          data.push_back(it2->second.get_value<uint8_t>());
+
+        config->m_data = data;
+      }
     }
 
     return config;

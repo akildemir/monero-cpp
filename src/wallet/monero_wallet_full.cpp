@@ -1978,9 +1978,22 @@ namespace monero {
       tr_destinations.push_back(tr_destination);
     }
 
-    // validate the requested txs and populate dsts & extra
-    std::vector<cryptonote::tx_destination_entry> dsts;
+    // check if we have arbitrary data and populate tx extra    
     std::vector<uint8_t> extra;
+    if (config.m_data != boost::none) {
+      const auto data = config.m_data.get();
+
+      // push the NONCE tag & size of the data
+      #define TX_EXTRA_NONCE  0x02
+      extra.push_back(TX_EXTRA_NONCE);
+      extra.push_back(data.size());
+
+      // push the data itself
+      extra.insert(extra.end(), data.begin(), data.end());
+    }
+
+    // validate the requested txs and populate dsts
+    std::vector<cryptonote::tx_destination_entry> dsts;
     epee::json_rpc::error err;
     if (!validate_transfer(m_w2.get(), tr_destinations, payment_id, dsts, extra, true, err)) {
       throw std::runtime_error(err.message);
